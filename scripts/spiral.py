@@ -41,7 +41,7 @@ def lineto(ba, sz, p1, p2, thick=4):
             dot(ba, sz, (x,y), thick)
 
 
-def draw_spiral(rot = 16, step = 0.4):
+def draw_spiral_old(rot = 15, step = 0.4):
     pts = [(0.5, 0.5)]
     
     stepcount = int(2*math.pi*rot // step)
@@ -51,7 +51,7 @@ def draw_spiral(rot = 16, step = 0.4):
     for i in range(stepcount):
         ang = step * i
         r = spi_const * ang
-        y = math.sin(ang) * r # SOH
+        y = math.sin(ang) * r
         x = math.cos(ang) * r
 
         y = y + 0.5
@@ -60,16 +60,74 @@ def draw_spiral(rot = 16, step = 0.4):
 
     return pts
 
-def points_to_img(sz, pts, thick=2):
+def get_val(img, px):
+    return (256 - img.getpixel(px)) / 256
+
+def draw_spiral_am(img, rot = 27, step = 0.001):
+    # arch spiral: r = const*ang
+    # const = maxradius / (2*pi*rot)
+    # len = Integrate(sqrt((r)**2 + (dr/dang)**2), ang0, ang1)
+    # len = Integrate(sqrt((const*ang)**2 + (Derive(const*ang, ang))**2), ang0, ang1)
+    # len = Integrate(sqrt((const*ang)**2 + (const**2), ang0, ang1)
+    # len = const Integrate(sqrt(ang**2 + 1), ang0, ang1)
+    # len = const * 0.5 * ((sqrt(ang1**2 + 1) * ang1 + asinh(ang1)) - (sqrt(ang0**2 + 1) * ang0 + asinh(ang0)))
+    # looks hard
+    # can we get a good guess? Pretend it is part of a circle?
+    # len = r * (ang1 - ang0)
+    # len = const * ang0 * (ang1 - ang0)
+    # Yeah, the difference goes to tiny very quickly between the real and fake len
+    # ang1 = ang0 + (len/(const*ang0))
+
+    pts = [(0.5, 0.5)]
+    prev = (0,0)
+    dist = 0
+
+    const = 0.5 / (2 * math.pi * rot)
+    ang = math.pi # can't start as 0
+    while True:
+        r = const * ang
+
+        y = 0.5 + math.sin(ang) * r
+        x = 0.5 + math.cos(ang) * r
+
+        dist += math.sqrt((x - prev[0])**2 + (y - prev[1])**2)
+
+        prev = (x,y)
+
+        # modulate
+        w = math.sin(dist * 600) * const * math.pi
+        w *= get_val(img, p2px((x,y), img.size))
+        r += w
+
+        # get modulated x,y
+        y = 0.5 + math.sin(ang) * r
+        x = 0.5 + math.cos(ang) * r
+
+        if x <= 0 or x >= 1 or y <= 0 or y >= 1:
+            break
+
+        pts.append((x,y))
+
+        # get next ang
+        ang = ang + (step/(const * ang))
+    
+    return pts
+
+
+def points_to_img(sz, pts, thick=2, lines=True):
     if len(pts) < 2:
         return None
 
     ba = bytearray(b"\xff" * (sz[0] * sz[1]))
 
-    prev = pts[0]
-    for p in pts[1:]:
-        lineto(ba, sz, p2px(prev, sz), p2px(p, sz), thick)
-        prev = p
+    if lines:
+        prev = pts[0]
+        for p in pts[1:]:
+            lineto(ba, sz, p2px(prev, sz), p2px(p, sz), thick)
+            prev = p
+    else:
+        for p in pts:
+            dot(ba, sz, p2px(p, sz), thick)
     
     return Image.frombytes("L", sz, bytes(ba))
 
@@ -81,9 +139,11 @@ def main():
     img = Image.open(img_path)
     img = img.convert(mode="L") # 8 bit pix, b & w
 
-    pts = draw_spiral(32, 0.1)
-    sbimg = points_to_img(img.size, pts, 1)
-    Image.blend(img, sbimg, 0.5).show()
+    pts = draw_spiral_am(img, 42)
+    sbimg = points_to_img(img.size, pts, 1, True)
+    #Image.blend(img, sbimg, 0.5).show()
+    sbimg.show()
+    sbimg.save(img_path + "modified.png")
 
 if __name__ == '__main__':
     main()
