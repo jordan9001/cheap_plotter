@@ -42,6 +42,24 @@ def lineto(ba, sz, p1, p2, thick=4):
             x = int(p1[0] + (dx * i))
             dot(ba, sz, (x,y), thick)
 
+def make_grid(numlines, linestep):
+    p = []
+
+    for ih in range(numlines):
+        pl = []
+        y = ih / (numlines-1)
+        for x in range(int(1/linestep)+1) if ih%2==0 else range(int(1/linestep)+1)[::-1]:
+            pl.append((x * linestep,y))
+        p.append(pl)
+
+    for iw in range(numlines)[::-1]:
+        pl = []
+        x = iw / (numlines-1)
+        for y in range(int(1/linestep)+1)[::-1] if iw%2==0 else range(int(1/linestep)+1):
+            pl.append((x,y * linestep))
+        p.append(pl)
+
+    return p
 
 def draw_spiral_old(rot = 15, step = 0.4):
     pts = [(0.5, 0.5)]
@@ -136,8 +154,11 @@ def points_to_img(sz, pts_list, thick=2, lines=True):
     return Image.frombytes("L", sz, bytes(ba))
 
 MAX_P = 10000
+VERSION = 1
 def points_to_path(pts_list):
     # file format:  (all little endian)
+    #
+    # format version    uint32
     # rest of file len  uint32
     # number of lines   uint32
     #   [
@@ -150,13 +171,15 @@ def points_to_path(pts_list):
     #       ...
     #   ] 
     
-    f = struct.pack("<I", len(pts_list))
+    f = b""
+    f += struct.pack("<I", len(pts_list))
     for pts in pts_list:
         f += struct.pack("<I", len(pts))
         for p in pts:
             f += struct.pack("<HH", int(p[0] * MAX_P), int(p[1] * MAX_P))
     
-    f = struct.pack("<I", len(f)) + f
+    f = struct.pack("<I", len(f) + 4 + 4) + f
+    f = struct.pack("<I", VERSION) + f
 
     return f
 

@@ -4,6 +4,15 @@
 #define POT_OFF         45
 #define POT_DEAD        5
 
+#define CARD_IN         17
+#define CARD_CS         10
+#define CARD_MOSI       11
+#define CARD_MISO       12
+#define CARD_CLK        13
+
+#define FILENAME        "path.bin"
+#define FILEVERSION     1
+
 #define STEP_LEFT_1     0
 #define STEP_LEFT_2     2
 #define STEP_LEFT_3     1
@@ -13,12 +22,20 @@
 #define STEP_RIGHT_3     5
 #define STEP_RIGHT_4     7
 
-#define MAX_SPEED       900
+#define MAXSPEED       600
 
 #define STEPSPERIN	2610
 #define STEPSAB		48348
 #define STEPSA		30015
 #define STEPSB		30015
+
+//#define CORNER0   {18381, 38743}
+//#define CORNER1   {35323, 17243}
+//#define CORNER3   {37499, 52646}
+
+#define CORNER0   {20519, 36838}
+#define CORNER1   {31684, 24220}
+#define CORNER3   {37534, 49658}
 
 // coordinates based on band length
 typedef struct {
@@ -40,3 +57,10 @@ typedef struct {
   int32_t y;
 } pcoord;
 
+typedef enum {
+  NOSDCARD,
+  GETHEADER,
+  GETLINE,
+  NEXTPOINT,
+  DONE,
+} filestate;
