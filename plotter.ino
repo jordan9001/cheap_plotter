@@ -312,12 +312,7 @@ void gotol(lencoord ln) {
   ctrl.moveTo(dest);
 
   //DEBUG
-  /*
-  Serial.println("BREAK");
-  while (Serial.read() != '\n') {
-    delay(600);
-  }
-
+  
   long next_print = 0;
   long t = 0;
   while(ctrl.run()) {
@@ -336,8 +331,8 @@ void gotol(lencoord ln) {
       next_print = t + 600;
     }
   }
-  */
-  ctrl.runSpeedToPosition();
+  
+  //ctrl.runSpeedToPosition();
 }
 
 void gotop(pcoord p) {

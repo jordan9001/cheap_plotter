@@ -33,9 +33,13 @@
 //#define CORNER1   {35323, 17243}
 //#define CORNER3   {37499, 52646}
 
-#define CORNER0   {20519, 36838}
-#define CORNER1   {31684, 24220}
-#define CORNER3   {37534, 49658}
+//#define CORNER0   {20519, 36838}
+//#define CORNER1   {31684, 24220}
+//#define CORNER3   {37534, 49658}
+
+#define CORNER0   {22640, 36112}
+#define CORNER1   {34892, 23743}
+#define CORNER3   {36829, 46482}
 
 // coordinates based on band length
 typedef struct {
