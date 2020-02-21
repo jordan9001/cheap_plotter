@@ -31,13 +31,13 @@ I say estimated because most of this stuff I had lying around anyways.
 So even if you didn't have anything lying about, I would guess you could get this working for under $50 dollars.
 
 ### How it works
-Like I mentioned above, this is hobby ware, and doesn't suppor GCODE or SVG or whatever the cool kids are using these days. I have my own format I use. In the scripts folder you will find a python script that can generate a single stroke spiral path based on an image. It will output in the format I use.
+Like I mentioned above, this is hobby ware, and doesn't support GCODE or SVG or whatever the cool kids are using these days. I have my own format I use. In the scripts folder you will find a python script that can generate a single stroke spiral path based on an image. It will output in the format I use.
 
-The controller itself is able to know how to set the paths with some basic trig. I hardcode how far away the motors are from eachother, and the band length at startup time. I also have hardcoded lengths for corners of the canvas. I may fix this so that corners are adjustable at runtime later. Knowing this allows us to do some triangle math to find what lengths the bands need to be for any given x and y coordinate.
+The controller itself is able to know how to set the paths with some basic trig. I hardcode how far away the motors are from each other, and the band length at startup time. I also have hardcoded lengths for corners of the canvas. I may fix this so that corners are adjustable at runtime later. Knowing this allows us to do some triangle math to find what lengths the bands need to be for any given x and y coordinate.
 
-linearlly interpolating band lenghts between two points will not result in a straight line, so the path is expected to be broken up into pretty small chunks so that we get "close-enough" to a real straight line.
+Linearly interpolating band lengths between two points will not result in a straight line, so the path is expected to be broken up into pretty small chunks so that we get "close-enough" to a real straight line.
 
 ### Lessons learned
-The biggest issues I ran into was working with such large numbers. All my lengths are measured in stepper motor steps, which are very fine. The lenghts all fit fine into a 32 bit integer, which is the register size for the teensy I was using. They fit fine, that is, until you try to square or multiply them. I had to cast to 64 bit integers in quite a few place to make sure I wasn't being killed by integer overflow.
+The biggest issues I ran into was working with such large numbers. All my lengths are measured in stepper motor steps, which are very fine. The lengths all fit fine into a 32 bit integer, which is the register size for the teensy I was using. They fit fine, that is, until you try to square or multiply them. I had to cast to 64 bit integers in quite a few place to make sure I wasn't being killed by integer overflow.
 
-Another lesson I learned was just how precise I didn't need to be. Small mistakes in measurement and inital position have a pretty not-noticable change on the output. They should introduce non-linearities but if I constrained my drawing to a decent size center they were not noticeable.
+Another lesson I learned was just how precise I didn't need to be. Small mistakes in measurement and initial position have a pretty not-noticeable change on the output. They should introduce non-linearities but if I constrained my drawing to a decent size center they were not noticeable.
